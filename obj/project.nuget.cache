@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "dgSpecHash": "xyHAxBP0CthlHIyLyYSqYtqZB11WgD7sB+vUQubffLp3I9IZNyUQHTLkXdP/e7Qqe08T5MXVoCLzZBfR03EuYg==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Tjakka5\\source\\repos\\MazeBacktracking\\MazeBacktracking.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Tjakka5\\.nuget\\packages\\opentk\\4.0.0-pre7\\opentk.4.0.0-pre7.nupkg.sha512",
+    "C:\\Users\\Tjakka5\\.nuget\\packages\\opentoolkit.core\\4.0.0-pre7\\opentoolkit.core.4.0.0-pre7.nupkg.sha512",
+    "C:\\Users\\Tjakka5\\.nuget\\packages\\opentoolkit.graphics\\4.0.0-pre7\\opentoolkit.graphics.4.0.0-pre7.nupkg.sha512",
+    "C:\\Users\\Tjakka5\\.nuget\\packages\\opentoolkit.input\\4.0.0-pre7\\opentoolkit.input.4.0.0-pre7.nupkg.sha512",
+    "C:\\Users\\Tjakka5\\.nuget\\packages\\opentoolkit.mathematics\\4.0.0-pre7\\opentoolkit.mathematics.4.0.0-pre7.nupkg.sha512",
+    "C:\\Users\\Tjakka5\\.nuget\\packages\\opentoolkit.redist.glfw\\3.3.0-pre20190419183326\\opentoolkit.redist.glfw.3.3.0-pre20190419183326.nupkg.sha512",
+    "C:\\Users\\Tjakka5\\.nuget\\packages\\opentoolkit.windowing.common\\4.0.0-pre7\\opentoolkit.windowing.common.4.0.0-pre7.nupkg.sha512",
+    "C:\\Users\\Tjakka5\\.nuget\\packages\\opentoolkit.windowing.desktop\\4.0.0-pre7\\opentoolkit.windowing.desktop.4.0.0-pre7.nupkg.sha512",
+    "C:\\Users\\Tjakka5\\.nuget\\packages\\opentoolkit.windowing.graphicslibraryframework\\4.0.0-pre7\\opentoolkit.windowing.graphicslibraryframework.4.0.0-pre7.nupkg.sha512"
+  ],
+  "logs": []
+}
