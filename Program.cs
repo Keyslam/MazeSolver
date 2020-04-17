@@ -16,10 +16,12 @@ namespace MazeBacktracking
 	{
 		static void Main(string[] args)
 		{
+			// Set up game window
 			GameWindowSettings gameWindowSettings = new GameWindowSettings
 			{
-				RenderFrequency = 60,
-				UpdateFrequency = 60
+				// Lower frequency for easy stepping
+				RenderFrequency = 10,
+				UpdateFrequency = 10
 			};
 
 			NativeWindowSettings nativeWindowSettings = new NativeWindowSettings
@@ -30,89 +32,176 @@ namespace MazeBacktracking
 
 			Window window = new Window(gameWindowSettings, nativeWindowSettings);
 
+			// Run game window
 			window.Run();
-
 		}
 	}
 
 	public class Window : GameWindow
 	{
+		/// <summary>
+		/// Shader to render with
+		/// </summary>
 		private Shader shader = null;
-		private Matrix4 perspectiveMatrix = Matrix4.Identity;
 
+		/// <summary>
+		/// Perspective matrix to render with
+		/// </summary>
+		private Matrix4 perspectiveMatrix = default;
+
+
+		/// <summary>
+		/// Current maze
+		/// </summary>
 		private Maze maze = null;
 
+		/// <summary>
+		/// Current solve routine
+		/// </summary>
 		private IEnumerator solveRoutine = null;
+
+		/// <summary>
+		/// All visited tiles
+		/// </summary>
 		private Dictionary<Vector2i, bool> visited = null;
+
+		/// <summary>
+		/// Solution
+		/// </summary>
 		private List<Vector2i> solution = null;
 
 		public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings) { }
-
-		
 
 		protected override void OnLoad()
 		{
 			base.OnLoad();
 
+			// Enable GL debugging
 			GL.Enable(EnableCap.DebugOutput);
 			DebugProc openGLDebugDelegate = new DebugProc(OpenGLDebugCallback);
 			GL.DebugMessageCallback(openGLDebugDelegate, IntPtr.Zero);
 
+			// Create shader
 			shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
 
+			// Create orthographic perspective matrix
 			perspectiveMatrix = Matrix4.CreateOrthographicOffCenter(0.0f, Size.X, Size.Y, 0.0f, -100.0f, 100.0f);
 
-			GL.ClearColor(new Color4(30, 30, 30, 255));
 
-			maze = MazeLoader.LoadMaze(MazeLoader.MazeType.MapTest3);
+			maze = MazeLoader.LoadMaze(MazeLoader.MazeType.Test3);
 
 			visited = new Dictionary<Vector2i, bool>();
 			solution = new List<Vector2i>();
 
-			/*solveRoutine = */MazeSolver.Solve(maze, out visited, out solution);
+			solveRoutine = MazeSolver.SolveRoutine(maze, out visited, out solution);
+		}
+
+		protected override void OnUpdateFrame(FrameEventArgs args)
+		{
+			base.OnUpdateFrame(args);
+
+			// Progress solve routine
+			if (KeyboardState.IsKeyDown(Key.Space))
+			{
+				if (solveRoutine == null)
+					if (maze != null)
+						solveRoutine = MazeSolver.SolveRoutine(maze, out visited, out solution);
+
+				if (solveRoutine != null)
+				{
+					object result = solveRoutine.Current;
+
+					if (result == null)
+						solveRoutine.MoveNext();
+				}
+			}
 		}
 
 		protected override void OnRenderFrame(FrameEventArgs args)
 		{
 			base.OnRenderFrame(args);
 
+			// Clear screenbuffer
 			GL.Clear(ClearBufferMask.ColorBufferBit);
 
+			// Active shader
 			shader.Use();
 
+			// Send perspective matrix to shader
 			int perspectiveMatrixLocation = shader.GetUniformLocation("perspectiveMatrix");
 			GL.UniformMatrix4(perspectiveMatrixLocation, true, ref perspectiveMatrix);
 
-			maze.Render(Size, visited, solution);
 
+			// Render maze
+			if (maze != null)
+				maze.Render(Size, visited, solution);
+
+
+			// Display screen contents
 			SwapBuffers();
-		}
-
-		private void OpenGLDebugCallback(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam)
-		{
-			string msg = Marshal.PtrToStringAnsi(message, length);
-			Console.WriteLine(msg);
 		}
 
 		protected override void OnKeyDown(KeyboardKeyEventArgs e)
 		{
 			base.OnKeyDown(e);
 
-			if (e.Key == Key.Space)
+			// Load test maze 1
+			if (e.Key == Key.F1)
 			{
-				solveRoutine.MoveNext();
+				ClearMaze();
+				maze = MazeLoader.LoadMaze(MazeLoader.MazeType.Test1);
 			}
+
+			// Load test maze 2
+			if (e.Key == Key.F2)
+			{
+				ClearMaze();
+				maze = MazeLoader.LoadMaze(MazeLoader.MazeType.Test2);
+			}
+
+			// Load test maze 3
+			if (e.Key == Key.F3)
+			{
+				ClearMaze();
+				maze = MazeLoader.LoadMaze(MazeLoader.MazeType.Test3);
+			}
+
+			// Solve maze
+			if (e.Key == Key.S)
+			{
+				if (maze != null)
+					MazeSolver.Solve(maze, out visited, out solution);
+			}
+		}
+
+		/// <summary>
+		/// Clears data associated with current maze
+		/// </summary>
+		private void ClearMaze()
+		{
+			maze = null;
+			visited = new Dictionary<Vector2i, bool>();
+			solution = new List<Vector2i>();
+			solveRoutine = null;
 		}
 
 		protected override void OnUnload()
 		{
+			// Dispose shader
 			if (shader != null)
 				shader.Dispose();
 
+			// Dispose maze
 			if (maze != null)
 				maze.Dispose();
 
 			base.OnUnload();
+		}
+
+		private void OpenGLDebugCallback(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam)
+		{
+			string msg = Marshal.PtrToStringAnsi(message, length);
+			Console.WriteLine(msg);
 		}
 	}
 }

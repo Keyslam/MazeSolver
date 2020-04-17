@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Tjakka5\\source\\repos\\MazeBacktracking\\MazeBacktracking.csproj": {}
+    "C:\\Users\\user\\Documents\\MazeSolver\\MazeBacktracking.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Tjakka5\\source\\repos\\MazeBacktracking\\MazeBacktracking.csproj": {
+    "C:\\Users\\user\\Documents\\MazeSolver\\MazeBacktracking.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Tjakka5\\source\\repos\\MazeBacktracking\\MazeBacktracking.csproj",
+        "projectUniqueName": "C:\\Users\\user\\Documents\\MazeSolver\\MazeBacktracking.csproj",
         "projectName": "MazeBacktracking",
-        "projectPath": "C:\\Users\\Tjakka5\\source\\repos\\MazeBacktracking\\MazeBacktracking.csproj",
-        "packagesPath": "C:\\Users\\Tjakka5\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Tjakka5\\source\\repos\\MazeBacktracking\\obj\\",
+        "projectPath": "C:\\Users\\user\\Documents\\MazeSolver\\MazeBacktracking.csproj",
+        "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\user\\Documents\\MazeSolver\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "c:\\program files\\dotnet\\sdk\\NuGetFallbackFolder"
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\Tjakka5\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -61,7 +61,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "c:\\program files\\dotnet\\sdk\\3.1.200\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.201\\RuntimeIdentifierGraph.json"
         }
       }
     }
