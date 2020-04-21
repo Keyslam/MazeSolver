@@ -10,6 +10,27 @@ namespace MazeBacktracking.Source
 	public static class MazeSolver
 	{
 		/// <summary>
+		/// Solution for a specific maze
+		/// </summary>
+		public class Solution
+		{
+			public readonly Maze maze = null;
+			public readonly HashSet<Vector2i> visited = null;
+			public readonly List<Vector2i> path = null;
+			public Vector2i currentPosition = default;
+
+			public Solution(Maze maze)
+			{
+				this.maze = maze;
+
+				visited = new HashSet<Vector2i>();
+				path = new List<Vector2i>();
+
+				currentPosition = maze.startPosition;
+			}
+		}
+
+		/// <summary>
 		/// Array of all directions the algorithm can branch into
 		/// </summary>
 		private static readonly Vector2i[] directions = new Vector2i[]
@@ -24,17 +45,11 @@ namespace MazeBacktracking.Source
 		/// Solves a maze
 		/// </summary>
 		/// <param name="maze">Maze to solve</param>
-		/// <param name="visited">All visited tiles</param>
-		/// <param name="solution">Path from end to start</param>
+		/// <param name="solution">Solution state for the maze</param>
 		/// <returns>True if found solution. False otherwise</returns>
-		public static bool Solve(Maze maze, out Dictionary<Vector2i, bool> visited, out List<Vector2i> solution)
+		public static bool Solve(Solution solution)
 		{
-			Vector2i startPosition = maze.StartPosition;
-
-			visited = new Dictionary<Vector2i, bool>();
-			solution = new List<Vector2i>();
-
-			IEnumerator coroutine = SolveStep(maze, startPosition, visited, solution);
+			IEnumerator coroutine = SolveStep(solution);
 
 			while (coroutine.MoveNext())
 			{
@@ -48,23 +63,6 @@ namespace MazeBacktracking.Source
 		}
 
 		/// <summary>
-		/// Solves a maze as a coroutine
-		/// </summary>
-		/// <param name="maze">Maze to solve</param>
-		/// <param name="visited">All visited tiles</param>
-		/// <param name="solution">Path from end to start</param>
-		/// <returns>IEnumerator</returns>
-		public static IEnumerator SolveRoutine(Maze maze, out Dictionary<Vector2i, bool> visited, out List<Vector2i> solution)
-		{
-			Vector2i startPosition = maze.StartPosition;
-
-			visited = new Dictionary<Vector2i, bool>();
-			solution = new List<Vector2i>();
-
-			return SolveStep(maze, startPosition, visited, solution);
-		}
-
-		/// <summary>
 		/// Explores one step in the solving algortihm
 		/// This is done by exploring all neighbours and checking it's validity,
 		/// then calling itself recursively.
@@ -72,39 +70,43 @@ namespace MazeBacktracking.Source
 		/// Eventually the target tile will be found (or all tiles will have been explored),
 		/// after which all branches will collapse.
 		/// </summary>
-		/// <param name="maze">Maze to solve</param>
-		/// <param name="currentPosition">Position to explore from</param>
-		/// <param name="visited">All visited tiles so far</param>
-		/// <param name="solution">Solution so far</param>
+		/// <param name="solution">Solution state for the maze</param>
 		/// <returns>IEnumerator</returns>
-		public static IEnumerator SolveStep(Maze maze, Vector2i currentPosition, Dictionary<Vector2i, bool> visited, List<Vector2i> solution)
+		public static IEnumerator SolveStep(Solution solution)
 		{
-			visited[currentPosition] = true;
+			// Track as being visited
+			solution.visited.Add(solution.currentPosition);
+
 			yield return null;
 
 			// Explore in every direction
 			foreach (Vector2i direction in directions)
 			{
-				Vector2i newPosition = currentPosition + direction;
-
+				Vector2i prefPosition = solution.currentPosition;
+				Vector2i newPosition = solution.currentPosition + direction;
+				
 				// Target reached
-				if (newPosition == maze.EndPosition)
+				if (newPosition == solution.maze.endPosition)
 					yield return true;
 
 				// Out of bounds
-				if (newPosition.X < 0 || newPosition.X >= maze.size.X || newPosition.Y < 0 || newPosition.Y >= maze.size.Y)
+				if (newPosition.X < 0 || newPosition.X >= solution.maze.size.X || newPosition.Y < 0 || newPosition.Y >= solution.maze.size.Y)
 					continue;
 
 				// Already visited
-				if (visited.ContainsKey(newPosition) && visited[newPosition])
+				if (solution.visited.Contains(newPosition))
 					continue;
 
 				// Tile is non-traversable
-				if (maze.GetTileSolid(newPosition))
+				if (solution.maze.GetTileSolid(newPosition))
 					continue;
 
+				
+				// Set new current position for this branch
+				solution.currentPosition = newPosition;
+
 				// Explore branch
-				IEnumerator branch = SolveStep(maze, newPosition, visited, solution);
+				IEnumerator branch = SolveStep(solution);
 				while (branch.MoveNext())
 				{
 					object result = branch.Current;
@@ -119,7 +121,7 @@ namespace MazeBacktracking.Source
 					if ((bool)result)
 					{
 						// Found solution. Traverse branch backwards
-						solution.Add(newPosition);
+						solution.path.Add(newPosition);
 						yield return true;
 					}
 					else
@@ -128,6 +130,9 @@ namespace MazeBacktracking.Source
 						yield return false;
 					}
 				}
+
+				// Restore position when branch is done being explored
+				solution.currentPosition = prefPosition;
 			}
 		}
 	}

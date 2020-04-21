@@ -73,11 +73,11 @@ namespace MazeBacktracking.Source
 		/// <param name="screenSize">Size of screen</param>
 		/// <param name="visited">Visited tiles</param>
 		/// <param name="solution">Solution</param>
-		public void RenderMaze(Maze maze, Vector2i screenSize, Dictionary<Vector2i, bool> visited, List<Vector2i> solution)
+		public void RenderMaze(Maze maze, Vector2i screenSize, MazeSolver.Solution solution = null)
 		{
 			Vector2 tileSize = new Vector2(screenSize.X / maze.size.X, screenSize.Y / maze.size.X);
 
-			CreateVertices(maze, tileSize, visited, solution);
+			CreateVertices(maze, tileSize, solution);
 			UpdateVAO();
 			DrawVAO();
 		}
@@ -126,7 +126,7 @@ namespace MazeBacktracking.Source
 		/// <param name="tileSize">Size of tiles</param>
 		/// <param name="visited">Visited tiles</param>
 		/// <param name="solution">Solution</param>
-		private void CreateVertices(Maze maze, Vector2 tileSize, Dictionary<Vector2i, bool> visited, List<Vector2i> solution)
+		private void CreateVertices(Maze maze, Vector2 tileSize, MazeSolver.Solution solution = null)
 		{
 			vertexCount = 0;
 
@@ -145,13 +145,13 @@ namespace MazeBacktracking.Source
 
 				// Select color based on what tile this is
 				Color4 color;
-				if (solution.Contains(tilePosition))
+				if (solution != null && solution.path.Contains(tilePosition))
 					color = solutionColor;
-				else if (maze.StartPosition == tilePosition)
+				else if (maze.startPosition == tilePosition)
 					color = startColor;
-				else if (maze.EndPosition == tilePosition)
+				else if (maze.endPosition == tilePosition)
 					color = endColor;
-				else if (visited.ContainsKey(tilePosition) && visited[tilePosition])
+				else if (solution != null && solution.visited.Contains(tilePosition))
 					color = visitedColor;
 				else if (maze.GetTileSolid(tilePosition))
 					color = solidColor;

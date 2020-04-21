@@ -9,11 +9,6 @@ namespace MazeBacktracking.Source
 	public static class MazeLoader
 	{
 		/// <summary>
-		/// MazeFriend to access maze's otherwise private properties
-		/// </summary>
-		private static readonly Maze.Friend MazeFriend = new Maze.Friend();
-
-		/// <summary>
 		/// All predefined mazes
 		/// </summary>
 		public enum MazeType
@@ -86,7 +81,7 @@ namespace MazeBacktracking.Source
 		/// </summary>
 		/// <param name="mazeType">Type of maze to load</param>
 		/// <returns>Loaded Maze</returns>
-		public static Maze LoadMaze(MazeType mazeType)
+		public static void LoadMaze(Maze maze, MazeType mazeType)
 		{
 			int[,] mazeData; // mazeData to read from
 
@@ -109,7 +104,7 @@ namespace MazeBacktracking.Source
 
 			// Create maze
 			Vector2i mazeSize = new Vector2i(mazeData.GetLength(0), mazeData.GetLength(1));
-			Maze maze = new Maze(mazeSize);
+			maze.SetSize(mazeSize);
 
 			// Build maze from mazeData
 			for (int i = 0; i < mazeData.Length; i++)
@@ -130,15 +125,13 @@ namespace MazeBacktracking.Source
 						maze.SetTileSolid(tilePosition, true);
 						break;
 					case 2:
-						MazeFriend.SetStartPosition(maze, tilePosition);
+						maze.startPosition = tilePosition;
 						break;
 					case 3:
-						MazeFriend.SetEndPosition(maze, tilePosition);
+						maze.endPosition = tilePosition;
 						break;
 				}
 			}
-
-			return maze;
 		}
 	}
 }

@@ -55,21 +55,6 @@ namespace MazeBacktracking
 		/// </summary>
 		private Maze maze = null;
 
-		/// <summary>
-		/// Current solve routine
-		/// </summary>
-		private IEnumerator solveRoutine = null;
-
-		/// <summary>
-		/// All visited tiles
-		/// </summary>
-		private Dictionary<Vector2i, bool> visited = null;
-
-		/// <summary>
-		/// Solution
-		/// </summary>
-		private List<Vector2i> solution = null;
-
 		public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings) { }
 
 		protected override void OnLoad()
@@ -87,13 +72,7 @@ namespace MazeBacktracking
 			// Create orthographic perspective matrix
 			perspectiveMatrix = Matrix4.CreateOrthographicOffCenter(0.0f, Size.X, Size.Y, 0.0f, -100.0f, 100.0f);
 
-
-			maze = MazeLoader.LoadMaze(MazeLoader.MazeType.Test3);
-
-			visited = new Dictionary<Vector2i, bool>();
-			solution = new List<Vector2i>();
-
-			solveRoutine = MazeSolver.SolveRoutine(maze, out visited, out solution);
+			maze = new Maze(MazeLoader.MazeType.Test3);
 		}
 
 		protected override void OnUpdateFrame(FrameEventArgs args)
@@ -102,19 +81,7 @@ namespace MazeBacktracking
 
 			// Progress solve routine
 			if (KeyboardState.IsKeyDown(Key.Space))
-			{
-				if (solveRoutine == null)
-					if (maze != null)
-						solveRoutine = MazeSolver.SolveRoutine(maze, out visited, out solution);
-
-				if (solveRoutine != null)
-				{
-					object result = solveRoutine.Current;
-
-					if (result == null)
-						solveRoutine.MoveNext();
-				}
-			}
+				maze.SolveStep();
 		}
 
 		protected override void OnRenderFrame(FrameEventArgs args)
@@ -131,11 +98,9 @@ namespace MazeBacktracking
 			int perspectiveMatrixLocation = shader.GetUniformLocation("perspectiveMatrix");
 			GL.UniformMatrix4(perspectiveMatrixLocation, true, ref perspectiveMatrix);
 
-
 			// Render maze
 			if (maze != null)
-				maze.Render(Size, visited, solution);
-
+				maze.Render(Size);
 
 			// Display screen contents
 			SwapBuffers();
@@ -147,42 +112,29 @@ namespace MazeBacktracking
 
 			// Load test maze 1
 			if (e.Key == Key.F1)
-			{
-				ClearMaze();
-				maze = MazeLoader.LoadMaze(MazeLoader.MazeType.Test1);
-			}
+				maze = new Maze(MazeLoader.MazeType.Test1);
 
 			// Load test maze 2
 			if (e.Key == Key.F2)
-			{
-				ClearMaze();
-				maze = MazeLoader.LoadMaze(MazeLoader.MazeType.Test2);
-			}
+				maze = new Maze(MazeLoader.MazeType.Test2);
 
 			// Load test maze 3
 			if (e.Key == Key.F3)
-			{
-				ClearMaze();
-				maze = MazeLoader.LoadMaze(MazeLoader.MazeType.Test3);
-			}
+				maze = new Maze(MazeLoader.MazeType.Test3);
 
 			// Solve maze
 			if (e.Key == Key.S)
 			{
 				if (maze != null)
-					MazeSolver.Solve(maze, out visited, out solution);
+					maze.Solve();
 			}
-		}
 
-		/// <summary>
-		/// Clears data associated with current maze
-		/// </summary>
-		private void ClearMaze()
-		{
-			maze = null;
-			visited = new Dictionary<Vector2i, bool>();
-			solution = new List<Vector2i>();
-			solveRoutine = null;
+			// Clear solution
+			if (e.Key == Key.C)
+			{
+				if (maze != null)
+					maze.ClearSolution();
+			}
 		}
 
 		protected override void OnUnload()

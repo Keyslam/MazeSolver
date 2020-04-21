@@ -1,6 +1,6 @@
 ﻿using OpenToolkit.Mathematics;
 using System;
-using System.Collections.Generic;
+using System.Collections;
 
 namespace MazeBacktracking.Source
 {
@@ -10,53 +10,19 @@ namespace MazeBacktracking.Source
 	public class Maze : IDisposable
 	{
 		/// <summary>
-		/// Friend class to give access to otherwise private fields
-		/// </summary>
-		public class Friend
-		{
-			/// <summary>
-			/// Sets the start position
-			/// </summary>
-			/// <param name="maze">Maze to set startposition of</param>
-			/// <param name="StartPosition">Startposition to set</param>
-			public void SetStartPosition(Maze maze, Vector2i StartPosition)
-			{
-				maze.StartPosition = StartPosition;
-			}
-
-			/// <summary>
-			/// Sets the end position
-			/// </summary>
-			/// <param name="maze">Maze to set endposition of</param>
-			/// <param name="EndPosition">Endposition to set</param>
-			public void SetEndPosition(Maze maze, Vector2i EndPosition)
-			{
-				maze.EndPosition = EndPosition;
-			}
-		}
-
-		/// <summary>
 		/// Size of the maze
 		/// </summary>
-		public readonly Vector2i size = default;
+		public Vector2i size = default;
 
 		/// <summary>
 		/// Start position of maze
 		/// </summary>
-		public Vector2i StartPosition
-		{
-			get;
-			private set;
-		}
+		public Vector2i startPosition = default;
 
 		/// <summary>
 		/// End position of maze
 		/// </summary>
-		public Vector2i EndPosition
-		{
-			get;
-			private set;
-		}
+		public Vector2i endPosition = default;
 
 		/// <summary>
 		/// Map of all tiles
@@ -71,19 +37,35 @@ namespace MazeBacktracking.Source
 		private MazeRenderer mazeRenderer = null;
 
 		/// <summary>
+		/// Solution for this maze
+		/// </summary>
+		private MazeSolver.Solution solution = null;
+
+		/// <summary>
+		/// Coroutine for solving
+		/// </summary>
+		private IEnumerator solutionRoutine = null;
+
+		/// <summary>
 		/// Create a maze
 		/// </summary>
-		/// <param name="size">Size of the maze</param>
-		public Maze(Vector2i size)
+		/// <param name="mazeType">MazeType to load</param>
+		public Maze(MazeLoader.MazeType mazeType)
 		{
-			if (size.X < 3 || size.Y < 3)
-				throw new ArgumentException("Both components of size need to be 3 or greater");
+			MazeLoader.LoadMaze(this, mazeType);
 
-			this.size = size;
+			mazeRenderer = new MazeRenderer(size.X * size.Y);
+		}
 
-			map = new bool[this.size.X, this.size.Y];
-
-			mazeRenderer = new MazeRenderer(this.size.X * this.size.Y);
+		/// <summary>
+		/// Sets the size of the maze
+		/// Clears all previously set tiles
+		/// </summary>
+		/// <param name="newSize">Size for maze to become</param>
+		public void SetSize(Vector2i newSize)
+		{
+			size = newSize;
+			map = new bool[size.X, size.Y];
 		}
 
 		/// <summary>
@@ -92,9 +74,52 @@ namespace MazeBacktracking.Source
 		/// <param name="screenSize">Size of screen</param>
 		/// <param name="visited">All visited tiles</param>
 		/// <param name="solution">Solution</param>
-		public void Render(Vector2i screenSize, Dictionary<Vector2i, bool> visited, List<Vector2i> solution)
+		public void Render(Vector2i screenSize)
 		{
-			mazeRenderer.RenderMaze(this, screenSize, visited, solution);
+			mazeRenderer.RenderMaze(this, screenSize, solution);
+		}
+
+		/// <summary>
+		/// Solve the maze
+		/// </summary>
+		public void Solve()
+		{
+			solution = new MazeSolver.Solution(this);
+			MazeSolver.Solve(solution);
+		}
+
+		/// <summary>
+		/// Solve one step of the maze
+		/// </summary>
+		/// <returns>Done</returns>
+		public bool SolveStep()
+		{
+			if (solutionRoutine == null)
+			{
+				if (solution == null)
+					solution = new MazeSolver.Solution(this);
+
+				solutionRoutine = MazeSolver.SolveStep(solution);
+			}
+
+			solutionRoutine.MoveNext();
+
+			bool done = false;
+			if (solutionRoutine.Current != null)
+				done = (bool)solutionRoutine.Current;
+
+			if (done)
+				solutionRoutine = null;
+
+			return done;
+		}
+
+		/// <summary>
+		/// Clear the current solution
+		/// </summary>
+		public void ClearSolution()
+		{
+			solution = null;
 		}
 
 		/// <summary>
